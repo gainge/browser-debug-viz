@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Captures are untrusted input; the CSP ensures nothing in them can execute or phone home. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; worker-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'"
+    />
+    <title>Chrome Debug Viz</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='1' y='3' width='9' height='3' rx='1' fill='%232f6fde'/%3E%3Crect x='5' y='8' width='10' height='3' rx='1' fill='%23e67e22'/%3E%3Crect x='3' y='13' width='6' height='2' rx='1' fill='%23d93025'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="css/app.css" />
+    <script type="module" src="js/main.js"></script>
+  </head>
+  <body class="empty">
+    <header class="app-header">
+      <h1 class="brand">Chrome Debug Viz</h1>
+      <label class="btn primary">
+        Open files…
+        <input id="file-input" type="file" multiple accept=".har,.json,.log,.txt,text/plain,application/json" hidden />
+      </label>
+      <button id="load-example" class="btn">Load example</button>
+      <div id="loaded-files" class="loaded-files"></div>
+      <span id="status" class="status" role="status"></span>
+      <span class="privacy" title="Files are read with the browser File API and never leave this machine.">🔒 Processed locally</span>
+    </header>
+    <nav id="tabs" class="tabs" role="tablist"></nav>
+    <main class="layout">
+      <section id="views" class="views"></section>
+      <aside id="detail" class="detail" hidden></aside>
+    </main>
+    <section class="empty-state">
+      <div class="drop-target">
+        <h2>Drop a HAR and/or console log here</h2>
+        <p>Or use <strong>Open files…</strong>. Both files are optional; load one of each to cross-reference them.</p>
+        <ul>
+          <li><strong>Network</strong>: DevTools → Network → ⤓ <em>Export HAR</em> (<code>.har</code>)</li>
+          <li><strong>Console</strong>: DevTools → Console → right-click → <em>Save as…</em> (<code>.log</code>). Enable <em>Show timestamps</em> in Console settings first to unlock the timeline.</li>
+        </ul>
+        <p class="muted">Nothing is uploaded. Parsing happens entirely in this browser tab.</p>
+      </div>
+    </section>
+    <div class="drop-overlay">Drop to load</div>
+  </body>
+</html>

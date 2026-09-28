@@ -1,0 +1,8 @@
+{
+  "name": "chrome-debug-viz",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}

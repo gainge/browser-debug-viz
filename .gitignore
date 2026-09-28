@@ -38,3 +38,9 @@ coverage/
 # Misc
 .cache/
 .tmp/
+
+# Exclude all samples
+examples/*
+
+# Local browser-automation artifacts
+.playwright-mcp/
