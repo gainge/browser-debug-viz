@@ -15,7 +15,6 @@ Thumbs.db
 !.env.example
 
 # Logs
-*.log
 logs/
 
 # Dependencies
@@ -41,6 +40,8 @@ coverage/
 
 # Exclude all samples
 examples/*
+*.log
+*.har
 
 # Local browser-automation artifacts
 .playwright-mcp/

@@ -22,6 +22,7 @@ const state = {
   model: null,
   views: {},
   route: { tab: 'issues', params: {} },
+  privateParams: {},
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -33,13 +34,18 @@ const status = $('#status');
 const detail = new DetailPane($('#detail'), ctx());
 
 // ---- routing -------------------------------------------------------------
-// The URL hash holds tab + filters + selection so the back button works and an
-// analyst can share a view with a colleague who has loaded the same files.
+// The URL hash holds tab + structural filters + selection so the back button
+// works and an analyst can share a view with a colleague who has loaded the same
+// files. Free text and values copied from the capture are kept in memory per tab
+// instead: the hash is persisted in browser history (which may sync off-machine)
+// and travels in every shared link.
+const PRIVATE_PARAMS = new Set(['q', 'host', 'src']);
 
 function parseHash() {
   const raw = location.hash.slice(1);
   const [tab, query = ''] = raw.split('?');
-  const params = Object.fromEntries(new URLSearchParams(query));
+  const params = {};
+  for (const [k, v] of new URLSearchParams(query)) if (!PRIVATE_PARAMS.has(k)) params[k] = v;
   return { tab: TABS.some((t) => t.id === tab) ? tab : 'issues', params };
 }
 
@@ -51,9 +57,18 @@ function buildHash(tab, params) {
 }
 
 function navigate(tab, params = {}, { replace = false } = {}) {
-  const hash = buildHash(tab, params);
-  if (hash === location.hash) return;
-  if (replace) {
+  const shared = {};
+  const priv = {};
+  for (const [k, v] of Object.entries(params)) {
+    if (v == null || v === '') continue;
+    (PRIVATE_PARAMS.has(k) ? priv : shared)[k] = v;
+  }
+  state.privateParams[tab] = priv;
+  const hash = buildHash(tab, shared);
+  // A private-only change leaves the hash untouched, so no hashchange will fire.
+  if (hash === location.hash) {
+    route();
+  } else if (replace) {
     history.replaceState(null, '', hash);
     route();
   } else {
@@ -92,7 +107,11 @@ function ctx() {
 }
 
 function route() {
-  state.route = parseHash();
+  const { tab: routeTab, params: hashParams } = parseHash();
+  // Strip private params arriving via an older or hand-built link so they aren't re-shared.
+  const canonical = buildHash(routeTab, hashParams);
+  if (location.hash && location.hash !== canonical) history.replaceState(null, '', canonical);
+  state.route = { tab: routeTab, params: { ...hashParams, ...state.privateParams[routeTab] } };
   const { tab, params } = state.route;
   for (const btn of tabBar.children) btn.classList.toggle('active', btn.dataset.tab === tab);
   for (const [id, view] of Object.entries(state.views)) view.el.hidden = id !== tab;
@@ -157,6 +176,7 @@ async function loadFiles(files) {
 function rebuild() {
   if (!state.har && !state.consoleLog) {
     state.model = null;
+    state.privateParams = {};
     renderShell();
     route();
     return;
@@ -228,7 +248,8 @@ function renderShell() {
           role: 'tab',
           dataset: { tab: t.id },
           disabled: !m,
-          onclick: () => navigate(t.id, t.id === state.route.tab ? state.route.params : lastParams[t.id] || {}, {}),
+          onclick: () =>
+            navigate(t.id, t.id === state.route.tab ? state.route.params : { ...lastParams[t.id], ...state.privateParams[t.id] }, {}),
         },
         t.label,
         counts[t.id] != null ? h('span', { class: 'count', text: counts[t.id].toLocaleString() }) : null,

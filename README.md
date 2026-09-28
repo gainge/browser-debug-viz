@@ -24,7 +24,7 @@ Ask the customer to enable these **before reproducing**:
 - **Console**: messages rebuilt from the text export, with inferred level and category. Duplicates are collapsed by default. Stack traces show async boundaries, and linked requests are shown for each message.
 - **Timeline**: requests and (when timestamped) console messages on one zoomable axis. Console times are local wall-clock and the HAR is UTC, so the UTC offset is inferred by matching console network-error lines to their requests. The offset can be adjusted manually.
 
-The URL hash holds the current tab, filters and selection. The back button works, and a link reproduces the same view for anyone who loads the same files.
+The URL hash holds the current tab, structural filters (status, type, flags, sort, grouping) and selection. The back button works, and a link reproduces the same view for anyone who loads the same files. Search text and the host and source filters are deliberately kept out of the URL, because the URL persists in browser history and travels in shared links. They're held in memory for the tab and cleared when every file is unloaded.
 
 ## Design notes
 
